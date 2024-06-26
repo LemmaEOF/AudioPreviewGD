@@ -11,21 +11,34 @@ class AudioPreviewGenerator : Node {
         var preview: AudioPreview
         var baseStream: AudioStream
         var playback: AudioStreamPlayback
-        var generating: Bool = false
+        var generating: Bool = false //TODO: atomic integer probably
         var id: UInt = 0
+        var thread: Thread
         
-        init(preview: AudioPreview, baseStream: AudioStream, playback: AudioStreamPlayback, generating: Bool, id: UInt) {
+        init(preview: AudioPreview, baseStream: AudioStream, playback: AudioStreamPlayback, generating: Bool, id: UInt, thread: Thread) {
             self.preview = preview
             self.baseStream = baseStream
             self.playback = playback
             self.generating = generating
             self.id = id
+            self.thread = thread
         }
     }
 
     #signal("preview_updated", arguments: ["audio_stream": AudioStream.self])
 
     static var previews: [UInt: Preview] = [:]
+    
+    func process_generation(previewId: UInt) {
+        //TODO: impl
+    }
+    
+    //awful gross type signature for Callable, don't worry about it it's fine
+    //TODO: should this happen on the shared or the instance? still gotta figure that stuff out for singleton stuff...
+    func thread_command(args: [SwiftGodot.Variant]) -> SwiftGodot.Variant? {
+        AudioPreviewGenerator.shared.process_generation(previewId: UInt(String(args[0])!)!)
+        return nil
+    }
 
     //TODO: @Callable doesn't work for static funcs yet, so just leave it like this and access static previews dict
     @Callable func generate_preview(stream: AudioStream) -> AudioPreview {
@@ -57,9 +70,14 @@ class AudioPreviewGenerator : Node {
         audioPreview.samples = samples
         audioPreview.length = length
         
-        var preview = Preview(preview: audioPreview, baseStream: baseStream, playback: playback, generating: true, id: id)
-
+        var thread = Thread()
+        
+        var preview = Preview(preview: audioPreview, baseStream: baseStream, playback: playback, generating: true, id: id, thread: thread)
+        
         AudioPreviewGenerator.previews[streamId] = preview
+        
+        //pass the id as a String because we can't trust the UInt id can fit inside an I64 for variant
+        preview.thread.start(callable: Callable(thread_command).bind(Variant(String(id))))
 
         return preview.preview
     }
