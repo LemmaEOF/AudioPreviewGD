@@ -1,10 +1,9 @@
 import SwiftGodot
 
-//TODO: this is single-threaded for now, I might look into multithreading later but Oh God The Perils
-//TODO: actually generate previews, not there quite yet wheeee
+//TODO: this should be good for testing!
 @Godot(.tool)
 class AudioPreviewGenerator : Node {
-    //TODO: can I expose this to Godot with current SwiftGodot? not sure I can, but it's here just in case
+    //TODO: can I expose this to Godot with current SwiftGodot? not sure I can so I just make all other generators a stub rn
     static var shared: AudioPreviewGenerator = AudioPreviewGenerator()
     
     private var signal_callable: Callable = Callable(signal_propagate as! ([Variant]) -> Variant?)
@@ -44,19 +43,68 @@ class AudioPreviewGenerator : Node {
     static var previews: [UInt: Preview] = [:]
     
     func process_generation(preview: Preview) {
-        //TODO: this is impossible to impl until SwiftGodot has correct `_mix` bindings, wheeeeeeeeeeeeeeeee
         let mixbuffChunkSeconds = 0.25
-        let mixbuffChunkFrames: Int = Int(AudioServer.getMixRate() * mixbuffChunkSeconds)
+        let mixbuffChunkFrames: UInt = UInt(AudioServer.getMixRate() * mixbuffChunkSeconds)
+        var buffer: UnsafeMutableBufferPointer<AudioFrame> = UnsafeMutableBufferPointer.allocate(capacity: Int(mixbuffChunkFrames))
         
+        let framesTotal: UInt = UInt(AudioServer.getMixRate() * preview.preview.length)
+        var framesTodo: UInt = framesTotal
         
-//        preview.playback.call(method:"_mix", )
+        preview.playback._start(fromPos: 0)
+        
+        while (framesTodo > 0) {
+            let writeOffset: UInt = (framesTotal-framesTodo) * UInt(preview.preview.samples.count) / framesTotal
+            let toRead: UInt = min(framesTodo, mixbuffChunkFrames)
+            var toWrite: UInt = toRead * UInt(preview.preview.samples.count) / framesTotal
+            toWrite = min(toWrite, UInt(preview.preview.samples.count) - writeOffset)
+            
+            preview.playback._mix(buffer: OpaquePointer(buffer.baseAddress), rateScale: 1.0, frames: Int32(toRead))
+            
+            for i in 0...toWrite {
+                var maxVal: Double = -1000
+                var minVal: Double = 1000
+                var from = UInt(i * toRead / toWrite)
+                var to = UInt((i + 1) * toRead / toWrite)
+                to = min(to, toRead)
+                from = min(from, toRead - 1)
+                
+                if (to == from) {
+                    to = from + 1
+                }
+                
+                for j in from...to {
+                    let frame: AudioFrame = buffer[Int(j)]
+                    
+                    maxVal = max(maxVal, Double(frame.left))
+                    maxVal = max(maxVal, Double(frame.right))
+                    
+                    minVal = min(minVal, Double(frame.left))
+                    minVal = min(minVal, Double(frame.right))
+                }
+                
+                let minByte: UInt8 = UInt8(GD.clamp(value: Variant((minVal * 0.5 + 0.5) * 255), min: Variant(0), max: Variant(255)))!
+                let maxByte: UInt8 = UInt8(GD.clamp(value: Variant((maxVal * 0.5 + 0.5) * 255), min: Variant(0), max: Variant(255)))!
+                
+                preview.preview.samples[Int(writeOffset+i)] = (min: minByte, max: maxByte)
+            }
+            
+            framesTodo -= toRead
+            callDeferred(method: "deferredSignal", Variant(preview.baseStream))
+        }
+        
+        preview.preview.version += 1
+        preview.playback._stop()
+        preview.generating = false
     }
     
     //awful gross type signature for Callable, don't worry about it it's fine
-    //TODO: should this happen on the shared or the instance? still gotta figure that stuff out for singleton stuff...
     func thread_command(args: [Variant]) -> Variant? {
         AudioPreviewGenerator.shared.process_generation(preview: AudioPreviewGenerator.previews[UInt(String(args[0])!)!]!)
         return nil
+    }
+    
+    func deferredSignal(stream: AudioStream) {
+        emit(signal: SignalWith1Argument("preview_updated", argument1Name: "audio_stream"), stream)
     }
     
     func signal_propagate(args: [Variant]) -> Variant? {

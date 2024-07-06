@@ -87,3 +87,4 @@ DerivedData/
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 .netrc
 *.xcworkspacedata
+src/AudioPreviewGD/.swiftpm/xcode/xcshareddata/xcschemes/AudioPreviewGD.xcscheme
