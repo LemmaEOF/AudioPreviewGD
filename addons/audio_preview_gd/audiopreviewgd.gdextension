@@ -1,0 +1,13 @@
+[configuration]
+
+entry_symbol = "swift_entry_point"
+compatibility_minimum = 4.2
+
+[libraries]
+
+macos.debug = "res://addons/audio_preview_gd/bin/libAudioPreviewGD.dylib"
+macos.release = "res://addons/audio_preview_gd/bin/libAudioPreviewGD.dylib"
+linux.debug.x86_64 = "res://addons/audio_preview_gd/bin/libAudioPreviewGD.so"
+linux.release.x86_64 = "res://addons/audio_preview_gd/bin/libAudioPreviewGD.so"
+windows.debug.x86_64 = "res://addons/audio_preview_gd/bin/AudioPreviewGD.dll"
+windows.release.x86_64 = "res://addons/audio_preview_gd/bin/AudioPreviewGD.dll"
