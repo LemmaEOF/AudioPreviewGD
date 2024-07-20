@@ -6,7 +6,8 @@ env:
   # For Windows/Linux
   swift-version: "5.10.1"
   # For macOS
-  xcode-version: "15.3"
+  xcode-version-aarch64: "15.3"
+  xcode-version-x86_64: "15.2"
 
 # !! HERE BE DRAGONS !!
 jobs:
@@ -46,7 +47,7 @@ jobs:
       - if: ${{ matrix.os-name == 'macOS' }}
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: ${{ env.xcode-version }}
+          xcode-version: ${{ matrix.arch == 'aarch64' && env.xcode-version-aarch64 || env.xcode-version-x86_64 }}
       - uses: actions/checkout@v4
       - name: Build
         run: swift build --package-path src/AudioPreviewGD
