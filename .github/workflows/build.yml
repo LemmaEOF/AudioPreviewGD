@@ -10,11 +10,11 @@ jobs:
         os: [ubuntu, macos, windows]
     runs-on: ${{ matrix.os }}-latest
     steps:
-      - if: ${{ matrix.os != "windows" }}
+      - if: ${{ matrix.os != 'windows' }}
         uses: swift-actions/setup-swift@v2
       # swift-actions/setup-swift does not support Windows
       # Watch this space: https://github.com/swift-actions/setup-swift/pull/676
-      - if: ${{ matrix.os == "windows" }}
+      - if: ${{ matrix.os == 'windows' }}
         uses: compnerd/gha-setup-swift@v0.2.3
         with:
           branch: swift-5.10.1-release
