@@ -20,13 +20,18 @@ jobs:
         with:
           name: ${{ matrix.os }}
           path: |
-            src/AudioPreviewGD/.build/**/libAudioPreviewGD.so
-            src/AudioPreviewGD/.build/**/libAudioPreviewGD.dylib
+            src/AudioPreviewGD/.build/**/*.so
+            src/AudioPreviewGD/.build/**/*.dylib
   build-windows:
     name: windows-latest
     runs-on: windows-latest
     steps:
+      # swift-actions/setup-swift does not support Windows
+      # Watch this space: https://github.com/swift-actions/setup-swift/pull/676
       - uses: compnerd/gha-setup-swift@v0.2.3
+        with:
+          branch: swift-5.10.1-release
+          tag: 5.10.1-RELEASE
       - uses: actions/checkout@v4
       - name: Build
         run: swift build --package-path src/AudioPreviewGD
@@ -35,5 +40,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}
-          path: src/AudioPreviewGD/.build/**/AudioPreviewGD.dll
+          path: src/AudioPreviewGD/.build/**/*.dll
 
