@@ -33,7 +33,7 @@ jobs:
             src/AudioPreviewGD/.build/**/*.dll
   bundle:
     name: Generate bundle
-    needs: [build-good-oses, build-windows]
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
