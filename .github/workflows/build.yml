@@ -11,7 +11,7 @@ env:
 # !! HERE BE DRAGONS !!
 jobs:
   build:
-    name: Build on ${{ matrix.os-name }} ${{ matrix.arch }} with ${{ format(startsWith(matrix.os, 'macos-') && 'Xcode {0}' || 'Swift {1}', env.xcode-version, env.swift-version) }}
+    name: Build on ${{ matrix.os-name }} ${{ matrix.arch }}
     strategy:
       matrix:
         include:
