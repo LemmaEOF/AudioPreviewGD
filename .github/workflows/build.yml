@@ -77,8 +77,11 @@ jobs:
         run: |
           ls -lR
           mkdir addons/audio_preview_gd/bin
+          cp ubuntu-latest/libSwiftGodot.so windows-latest/SwiftGodot.dll addons/audio_preview_gd/bin
           cp ubuntu-latest/libAudioPreviewGD.so windows-latest/AudioPreviewGD.dll addons/audio_preview_gd/bin
+          cp macos-latest/libSwiftGodot.dylib addons/audio_preview_gd/bin/libSwiftGodot-aarch64.dylib
           cp macos-latest/libAudioPreviewGD.dylib addons/audio_preview_gd/bin/libAudioPreviewGD-aarch64.dylib
+          cp macos-13/libSwiftGodot.dylib addons/audio_preview_gd/bin/libSwiftGodot-x86_64.dylib
           cp macos-13/libAudioPreviewGD.dylib addons/audio_preview_gd/bin/libAudioPreviewGD-x86_64.dylib
           zip -r9 audio_preview_gd.zip addons
           echo commit_count=$(git rev-list --count HEAD) >> "$GITHUB_ENV"
