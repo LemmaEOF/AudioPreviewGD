@@ -16,14 +16,12 @@ jobs:
         run: swift build --package-path src/AudioPreviewGD
       - name: Test
         run: swift test --package-path src/AudioPreviewGD
-      - &uploadartifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}
           path: |
             src/AudioPreviewGD/.build/**/libAudioPreviewGD.so
             src/AudioPreviewGD/.build/**/libAudioPreviewGD.dylib
-            src/AudioPreviewGD/.build/**/AudioPreviewGD.dll
   build-windows:
     name: windows-latest
     runs-on: windows-latest
@@ -34,5 +32,8 @@ jobs:
         run: swift build --package-path src/AudioPreviewGD
       - name: Test
         run: swift test --package-path src/AudioPreviewGD
-      - *uploadartifact
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}
+          path: src/AudioPreviewGD/.build/**/AudioPreviewGD.dll
 
