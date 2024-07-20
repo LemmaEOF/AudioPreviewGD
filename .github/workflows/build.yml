@@ -4,11 +4,11 @@ on: [push]
 
 jobs:
   build:
-    name: Build on ${{ matrix.os }}
+    name: Build on ${{ matrix.os }} with Swift ${{ matrix.swift-version }}
     strategy:
       matrix:
         os: [ubuntu, macos, windows]
-        swift-version: "5.10.1"
+        swift-version: ["5.10.1"]
     runs-on: ${{ matrix.os }}-latest
     steps:
       - if: ${{ matrix.os != 'windows' }}
@@ -20,8 +20,8 @@ jobs:
       - if: ${{ matrix.os == 'windows' }}
         uses: compnerd/gha-setup-swift@v0.2.3
         with:
-          branch: swift-${{swift-version}}}-release
-          tag: ${{swift-version}}}-RELEASE
+          branch: swift-${{ matrix.swift-version }}-release
+          tag: ${{ matrix.swift-version }}-RELEASE
       - uses: actions/checkout@v4
       - name: Build
         run: swift build --package-path src/AudioPreviewGD
