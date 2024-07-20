@@ -4,24 +4,24 @@ on: [push]
 
 jobs:
   build:
-    name: Build on ${{ matrix.os }} with Swift ${{ matrix.swift-version }}
+    name: Build on ${{ matrix.os }} with Swift v${{ matrix.swift }}
     strategy:
       matrix:
         os: [ubuntu, macos, windows]
-        swift-version: ["5.10.1"]
+        swift: ["5.10.1"]
     runs-on: ${{ matrix.os }}-latest
     steps:
       - if: ${{ matrix.os != 'windows' }}
         uses: swift-actions/setup-swift@v2
         with:
-          swift-version: ${{swift-version}}}
+          swift-version: ${{ matrix.swift }}
       # swift-actions/setup-swift does not support Windows
       # Watch this space: https://github.com/swift-actions/setup-swift/pull/676
       - if: ${{ matrix.os == 'windows' }}
         uses: compnerd/gha-setup-swift@v0.2.3
         with:
-          branch: swift-${{ matrix.swift-version }}-release
-          tag: ${{ matrix.swift-version }}-RELEASE
+          branch: swift-${{ matrix.swift }}-release
+          tag: ${{ matrix.swift }}-RELEASE
       - uses: actions/checkout@v4
       - name: Build
         run: swift build --package-path src/AudioPreviewGD
