@@ -34,5 +34,5 @@ jobs:
         run: swift build --package-path src/AudioPreviewGD
       - name: Test
         run: swift test --package-path src/AudioPreviewGD
-        - *uploadartifact
+      - *uploadartifact
 
