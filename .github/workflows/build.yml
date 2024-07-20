@@ -24,6 +24,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/download-artifact@v4
         with:
+          github-token: ${{ github.token }}
           run-id: "10017335843"
       - name: Aggregate artifacts
         run: |
