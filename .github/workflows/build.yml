@@ -3,11 +3,11 @@ name: Build
 on: [push]
 
 jobs:
-  build:
+  build-good-oses:
     name: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: swift-actions/setup-swift@v2
@@ -16,10 +16,23 @@ jobs:
         run: swift build --package-path src/AudioPreviewGD
       - name: Test
         run: swift test --package-path src/AudioPreviewGD
-      - uses: actions/upload-artifact@v4
+      - &uploadartifact
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}
           path: |
             src/AudioPreviewGD/.build/**/libAudioPreviewGD.so
             src/AudioPreviewGD/.build/**/libAudioPreviewGD.dylib
             src/AudioPreviewGD/.build/**/AudioPreviewGD.dll
+  build-windows:
+    name: windows-latest
+    runs-on: windows-latest
+    steps:
+      - uses: compnerd/gha-setup-swift@v0.2.3
+      - uses: actions/checkout@v4
+      - name: Build
+        run: swift build --package-path src/AudioPreviewGD
+      - name: Test
+        run: swift test --package-path src/AudioPreviewGD
+        - *uploadartifact
+
