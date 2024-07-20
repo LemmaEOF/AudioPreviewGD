@@ -11,27 +11,39 @@ env:
 # !! HERE BE DRAGONS !!
 jobs:
   build:
-    name: Build on ${{ runner.os }} ${{ runner.arch }} with ${{ format(startsWith(matrix.os, 'macos-') && 'Xcode {0}' || 'Swift {1}', env.xcode-version, env.swift-version) }}
+    name: Build on ${{ matrix.os-name }} ${{ matrix.arch }} with ${{ format(startsWith(matrix.os, 'macos-') && 'Xcode {0}' || 'Swift {1}', env.xcode-version, env.swift-version) }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, macos-13, windows-latest]
+        include:
+        - os: ubuntu-latest
+          os-name: Linux
+          arch: x86_64
+        - os: windows-latest
+          os-name: Windows
+          arch: x86_64
+        - os: macos-latest
+          os-name: macOS
+          arch: aarch64
+        - os: macos-13
+          os-name: macOS
+          arch: x86_64
     runs-on: ${{ matrix.os }}
     steps:
       # In an ideal world, we'd just use this action for all OSes.
-      - if: ${{ matrix.os == 'ubuntu-latest' }}
+      - if: ${{ matrix.os-name == 'Linux' }}
         uses: swift-actions/setup-swift@v2
         with:
           swift-version: ${{ env.swift-version }}
       # swift-actions/setup-swift does not support Windows
       # Watch this space: https://github.com/swift-actions/setup-swift/pull/676
-      - if: ${{ matrix.os == 'windows-latest' }}
+      - if: ${{ matrix.os-name == 'Windows' }}
         uses: compnerd/gha-setup-swift@v0.2.3
         with:
           branch: swift-${{ env.swift-version }}-release
           tag: ${{ env.swift-version }}-RELEASE
       # Getting an "InOutToPointerExpr in unexpected position!" error when using setup-swift on macOS.
       # Absolutely no clue why. This action is the one GodotSwift uses for running its tests.
-      - if: ${{ startsWith(matrix.os, 'macos-') }}
+      - if: ${{ matrix.os-name == 'macOS' }}
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: ${{ env.xcode-version }}
