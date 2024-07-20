@@ -3,32 +3,19 @@ name: Build
 on: [push]
 
 jobs:
-  build-good-oses:
+  build:
     name: Build on ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+        os: [ubuntu, macos, windows]
+    runs-on: ${{ matrix.os }}-latest
     steps:
-      - uses: swift-actions/setup-swift@v2
-      - uses: actions/checkout@v4
-      - name: Build
-        run: swift build --package-path src/AudioPreviewGD
-      - name: Test
-        run: swift test --package-path src/AudioPreviewGD
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.os }}
-          path: |
-            src/AudioPreviewGD/.build/**/*.so
-            src/AudioPreviewGD/.build/**/*.dylib
-  build-windows:
-    name: Build on windows-latest
-    runs-on: windows-latest
-    steps:
+      - if: ${{ matrix.os != "windows" }}
+        uses: swift-actions/setup-swift@v2
       # swift-actions/setup-swift does not support Windows
       # Watch this space: https://github.com/swift-actions/setup-swift/pull/676
-      - uses: compnerd/gha-setup-swift@v0.2.3
+      - if: ${{ matrix.os == "windows" }}
+        uses: compnerd/gha-setup-swift@v0.2.3
         with:
           branch: swift-5.10.1-release
           tag: 5.10.1-RELEASE
@@ -40,7 +27,10 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}
-          path: src/AudioPreviewGD/.build/**/*.dll
+          path: |
+            src/AudioPreviewGD/.build/**/*.so
+            src/AudioPreviewGD/.build/**/*.dylib
+            src/AudioPreviewGD/.build/**/*.dll
   bundle:
     name: Generate bundle
     needs: [build-good-oses, build-windows]
