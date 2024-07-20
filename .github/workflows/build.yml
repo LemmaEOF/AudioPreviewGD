@@ -31,8 +31,8 @@ jobs:
           ls -lR
           mkdir addons/audio_preview_gd/bin
           cp ubuntu-latest/libAudioPreviewGD.so windows-latest/AudioPreviewGD.dll addons/audio_preview_gd/bin
-          cp macos-latest/libAudioPreview.dylib addons/audio_preview_gd/bin/libAudioPreview-aarch64.dylib
-          cp macos-13/libAudioPreview.dylib addons/audio_preview_gd/bin/libAudioPreview-x86_64.dylib
+          cp macos-latest/libAudioPreviewGD.dylib addons/audio_preview_gd/bin/libAudioPreviewGD-aarch64.dylib
+          cp macos-13/libAudioPreviewGD.dylib addons/audio_preview_gd/bin/libAudioPreviewGD-x86_64.dylib
           zip -r9 audio_preview_gd.zip addons
           echo commit_count=$(git rev-list --count HEAD) >> "$GITHUB_ENV"
       - name: Upload release
