@@ -2,6 +2,9 @@ name: Build
 
 on: [push]
 
+permissions:
+  contents: write
+
 env:
   # For Windows/Linux
   swift-version: "5.10.1"
@@ -67,14 +70,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/download-artifact@v4
       - run: |
           mkdir addons/audio_preview_gd/bin
           cp ubuntu-latest/libAudioPreviewGD.so windows-latest/AudioPreviewGD.dll addons/audio_preview_gd/bin
           cp macos-latest/libAudioPreview.dylib addons/audio_preview_gd/bin/libAudioPreview-aarch64.dylib
           cp macos-13/libAudioPreview.dylib addons/audio_preview_gd/bin/libAudioPreview-x86_64.dylib
-      - uses: actions/upload-artifact@v4
+          zip -r9 audio_preview_gd.zip addons
+          echo commit_count=$(git rev-list --count HEAD) >> "$GITHUB_ENV"
+      - name: Upload release
+        uses: softprops/action-gh-release@v2
         with:
-          name: bundle
-          path: addons
-          compression-level: 9
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          files: audio_preview_gd.zip
+          tag_name: "1.${{ env.commit_count }}"
+          generate_release_notes: true
+          prerelease: true
+          fail_on_unmatched_files: true
