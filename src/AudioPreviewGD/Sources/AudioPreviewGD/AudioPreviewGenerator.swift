@@ -6,7 +6,7 @@ class AudioPreviewGenerator : Node {
     //TODO: can I expose this to Godot with current SwiftGodot? not sure I can so I just make all other generators a stub rn
     static var shared: AudioPreviewGenerator = AudioPreviewGenerator()
     
-    private var signal_callable: Callable = Callable(signal_propagate as! ([Variant]) -> Variant?)
+    private var signal_callable: Callable? = nil
     
     class Preview {
         var preview: AudioPreview
@@ -14,7 +14,7 @@ class AudioPreviewGenerator : Node {
         var playback: AudioStreamPlayback
         var generating: Bool //TODO: atomic boolean probably
         var id: UInt
-        var thread: Thread
+        var thread: Thread?
         
         init(preview: AudioPreview, baseStream: AudioStream, playback: AudioStreamPlayback, generating: Bool, id: UInt, thread: Thread) {
             self.preview = preview
@@ -28,13 +28,18 @@ class AudioPreviewGenerator : Node {
     
     override func _ready() {
         if (self != AudioPreviewGenerator.shared) {
-            AudioPreviewGenerator.shared.connect(signal: "preview_updated", callable: signal_callable)
+            signal_callable = Callable(signal_propagate)
+            //if signal_callable is nil immediately after being assigned then Something Went Very Fucking Wrong
+            AudioPreviewGenerator.shared.connect(signal: "preview_updated", callable: signal_callable!)
         }
     }
     
     deinit {
         if (self != AudioPreviewGenerator.shared) {
-            AudioPreviewGenerator.shared.disconnect(signal: "preview_updated", callable: signal_callable)
+            if (signal_callable != nil) {
+                //nil check above so I can just Do This
+                AudioPreviewGenerator.shared.disconnect(signal: "preview_updated", callable: signal_callable!)
+            }
         }
     }
     
@@ -60,7 +65,7 @@ class AudioPreviewGenerator : Node {
             
             preview.playback._mix(buffer: OpaquePointer(buffer.baseAddress), rateScale: 1.0, frames: Int32(toRead))
             
-            for i in 0...toWrite {
+            for i in 0..<toWrite {
                 var maxVal: Double = -1000
                 var minVal: Double = 1000
                 var from = UInt(i * toRead / toWrite)
@@ -72,7 +77,7 @@ class AudioPreviewGenerator : Node {
                     to = from + 1
                 }
                 
-                for j in from...to {
+                for j in from..<to {
                     let frame: AudioFrame = buffer[Int(j)]
                     
                     maxVal = max(maxVal, Double(frame.left))
@@ -82,8 +87,8 @@ class AudioPreviewGenerator : Node {
                     minVal = min(minVal, Double(frame.right))
                 }
                 
-                let minByte: UInt8 = UInt8(GD.clamp(value: Variant((minVal * 0.5 + 0.5) * 255), min: Variant(0), max: Variant(255)))!
-                let maxByte: UInt8 = UInt8(GD.clamp(value: Variant((maxVal * 0.5 + 0.5) * 255), min: Variant(0), max: Variant(255)))!
+                let minByte: UInt8 = UInt8(min(max(0, (minVal * 0.5 + 0.5) * 255), 255))
+                let maxByte: UInt8 = UInt8(min(max(0, (maxVal * 0.5 + 0.5) * 255), 255))
                 
                 preview.preview.samples[Int(writeOffset+i)] = (min: minByte, max: maxByte)
             }
@@ -132,11 +137,11 @@ class AudioPreviewGenerator : Node {
         
         var frames: Int = Int(AudioServer.getMixRate() * length) / 20
         
-        var samples: [(min: UInt8, max: UInt8)] = []
+        var samples = [(min: UInt8, max: UInt8)](repeating: (0, 255), count: frames-1)
         
-        for i in 0...frames {
-            samples[i] = (0, 255) //this is 127 in the original C++, even though it's an unsigned int??
-        }
+//        for i in 0...frames {
+//            samples[i] = (0, 255) //this is 127 in the original C++, even though it's an unsigned int??
+//        }
         
         var audioPreview = AudioPreview(samples: samples, length: length)
         audioPreview.samples = samples
@@ -149,8 +154,14 @@ class AudioPreviewGenerator : Node {
         AudioPreviewGenerator.previews[streamId] = preview
         
         //pass the id as a String because we can't trust the UInt id can fit inside an I64 for variant
-        preview.thread.start(callable: Callable(thread_command).bind(Variant(String(id))))
+        //! is safe because we just gave it a thread above
+        preview.thread!.start(callable: Callable(thread_command).bind(Variant(String(id))))
         
         return preview.preview
+    }
+    
+    //TODO: override once SwiftGodot supports (whyyy)
+    func _notification(what: Int32) {
+        
     }
 }

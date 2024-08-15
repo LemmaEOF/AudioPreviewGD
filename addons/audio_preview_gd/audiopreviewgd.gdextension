@@ -16,8 +16,10 @@ windows.release.x86_64 = "res://addons/audio_preview_gd/bin/AudioPreviewGD.dll"
 
 [dependencies]
 
-macos.release = {"res://addons/audio_preview_gd/bin/libSwiftGodot.dylib" : ""}
-macos.debug = {"res://addons/audio_preview_gd/bin/libSwiftGodot.dylib" : ""}
+macos.release.x86_64 = {"res://addons/audio_preview_gd/bin/libSwiftGodot-x86_64.dylib" : ""}
+macos.debug.x86_64 = {"res://addons/audio_preview_gd/bin/libSwiftGodot-x86_64.dylib" : ""}
+macos.release.arm64 = {"res://addons/audio_preview_gd/bin/libSwiftGodot-arm64.dylib" : ""}
+macos.debug.arm64 = {"res://addons/audio_preview_gd/bin/libSwiftGodot-arm64.dylib" : ""}
 linux.debug.x86_64 = {"res:/addons/audio_preview_gd//bin/libSwiftGodot.so" : ""}
 linux.release.x86_64 = {"res://addons/audio_preview_gd/bin/libSwiftGodot.so" : ""}
 windows.debug.x86_64 = {"res://addons/audio_preview_gd/bin/SwiftGodot.dll" : ""}
