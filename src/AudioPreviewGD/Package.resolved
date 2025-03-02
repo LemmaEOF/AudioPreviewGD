@@ -1,12 +1,22 @@
 {
+  "originHash" : "34fd96d5f31cfe0788f92e44a5e8890bfde465a7ac0252b3a9d8d12db515f370",
   "pins" : [
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser",
+      "state" : {
+        "revision" : "41982a3656a71c768319979febd796c6fd111d5c",
+        "version" : "1.5.0"
+      }
+    },
     {
       "identity" : "swift-syntax",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-syntax",
+      "location" : "https://github.com/swiftlang/swift-syntax",
       "state" : {
-        "revision" : "303e5c5c36d6a558407d364878df131c3546fad8",
-        "version" : "510.0.2"
+        "revision" : "0687f71944021d616d34d922343dcef086855920",
+        "version" : "600.0.1"
       }
     },
     {
@@ -15,9 +25,9 @@
       "location" : "https://github.com/migueldeicaza/SwiftGodot",
       "state" : {
         "branch" : "main",
-        "revision" : "6a1d1d30ba1338c6303db91b16259f92689bec8d"
+        "revision" : "47c0002f86f6eabcecb1c5f740cba48965d6c71b"
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }

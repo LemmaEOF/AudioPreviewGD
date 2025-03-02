@@ -1,0 +1,7 @@
+{
+    "makefile.configureOnOpen": true,
+    "swift.path": "/Library/Developer/Toolchains/swift-6.0.3-RELEASE.xctoolchain/usr/bin",
+    "swift.swiftEnvironmentVariables": {
+        "DEVELOPER_DIR": "/Applications/Xcode.app"
+    }
+}

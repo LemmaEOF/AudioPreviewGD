@@ -7,7 +7,7 @@ permissions:
 
 env:
   # For Windows/Linux
-  swift-version: "5.10.1"
+  swift-version: "6.0.3"
   # For macOS
   xcode-version-aarch64: "15.3"
   xcode-version-x86_64: "15.2"
